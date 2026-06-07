@@ -2,11 +2,11 @@
 
 namespace PaymentGateway.Api.BankAdapter
 {
-    public static class BankAdapterFactory
+    public class BankAdapterFactory : IBankAdapterFactory
     {
-        private static MounteBankAdapter? Adapter { get; set; }
+        private MounteBankAdapter? Adapter { get; set; }
 
-        public static IBankAdapter GetAdapter(string bankName)
+        public IBankAdapter GetAdapter(string bankName)
         {
             if (string.Equals(bankName, "MounteBank", StringComparison.InvariantCultureIgnoreCase))
             {

@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 
+using PaymentGateway.Api.BankAdapter;
 using PaymentGateway.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<PaymentsRepository>();
+builder.Services.AddSingleton<IBankAdapterFactory,BankAdapterFactory>();
 
 var app = builder.Build();
 

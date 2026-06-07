@@ -15,10 +15,12 @@ namespace PaymentGateway.Api.Controllers;
 public class PaymentsController : Controller
 {
     private readonly PaymentsRepository _paymentsRepository;
+    private readonly IBankAdapterFactory _bankAdapterFactory;
 
-    public PaymentsController(PaymentsRepository paymentsRepository)
+    public PaymentsController(PaymentsRepository paymentsRepository, IBankAdapterFactory bankAdapterFactory)
     {
         _paymentsRepository = paymentsRepository;
+        _bankAdapterFactory = bankAdapterFactory;
     }
 
     [HttpGet("{id:guid}")]
@@ -39,7 +41,7 @@ public class PaymentsController : Controller
         PostPaymentResponse postPaymentResponse;
         try
         {
-            var adapter = BankAdapterFactory.GetAdapter("MounteBank");
+            var adapter = _bankAdapterFactory.GetAdapter("MounteBank");
             adapter.ValidateRequest(request);
 #pragma warning disable CS8604, CS8629
             var result = await adapter.Pay(
@@ -65,11 +67,31 @@ public class PaymentsController : Controller
         }
         catch (PaymentValidationException ex)
         {
-            return new BadRequestObjectResult(string.Format("{0}: {1}", ex.Field, ex.Message));
+            postPaymentResponse = new PostPaymentResponse()
+            {
+                Id = paymentId,
+                AuthorizationCode = "0000",
+                Status = PaymentStatus.Rejected,
+                CardNumberLastFour = string.IsNullOrEmpty(request.CardNumber) ? "" : request.CardNumber[^4..],
+                ExpiryMonth = request.ExpiryMonth ?? 0,
+                ExpiryYear = request.ExpiryYear ?? 0,
+                Currency = string.IsNullOrEmpty(request.Currency) ? "" : request.Currency[..3],
+                Amount = request.Amount ?? 0,
+            };
         }
         catch (BankException ex)
         {
-            return new StatusCodeResult((int)ex.StatusCode);
+            postPaymentResponse = new PostPaymentResponse()
+            {
+                Id = paymentId,
+                AuthorizationCode = "1111",
+                Status = PaymentStatus.Rejected,
+                CardNumberLastFour = string.IsNullOrEmpty(request.CardNumber) ? "" : request.CardNumber[^4..],
+                ExpiryMonth = request.ExpiryMonth ?? 0,
+                ExpiryYear = request.ExpiryYear ?? 0,
+                Currency = string.IsNullOrEmpty(request.Currency) ? "" : request.Currency[..3],
+                Amount = request.Amount ?? 0,
+            };
         }
         _paymentsRepository.Add(postPaymentResponse);
         return new OkObjectResult(postPaymentResponse);
