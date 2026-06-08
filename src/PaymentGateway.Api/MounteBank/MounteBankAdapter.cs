@@ -13,7 +13,10 @@ namespace PaymentGateway.Api.MounteBank
 
         public static Uri GetBankEndpoint()
         {
-            return new Uri("http://172.17.221.16:8080/payments");
+            var endpoint = Environment.GetEnvironmentVariable("MOUNTEBANK_ENDPOINT");
+            return new Uri(string.IsNullOrWhiteSpace(endpoint)
+                ? "http://127.0.0.1:8080/payments"
+                : endpoint);
         }
     }
 
