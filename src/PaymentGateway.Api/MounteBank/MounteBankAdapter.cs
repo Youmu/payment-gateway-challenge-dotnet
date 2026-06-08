@@ -33,11 +33,6 @@ namespace PaymentGateway.Api.MounteBank
             _endpoint = MounteBankConfig.GetBankEndpoint();
         }
 
-        public Task Connect()
-        {
-            return Task.CompletedTask;
-        }
-
         public async Task<BankResponse> Pay(string cardNumber, int expMonth, int expYear, string currency, int amount, string cvv)
         {
             var paymentData = new

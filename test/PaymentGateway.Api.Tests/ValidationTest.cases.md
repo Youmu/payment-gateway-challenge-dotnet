@@ -1,8 +1,8 @@
 # ValidateRequest Test Cases
 
-Tests for `MounteBankAdapter.ValidateRequest` in `ValidationTest.cs`, based on [validation_spec.md](../../src/PaymentGateway.Api/BankAdapters/validation_spec.md).
+Tests for `MounteBankAdapter.ValidateRequest` in `ValidationTest.cs`, based on [validation_spec.md](../../src/PaymentGateway.Api/MounteBank/validation_spec.md).
 
-**Total:** 39 test executions (22 test methods, including parameterized `[Theory]` cases)
+**Total:** 45 test executions (27 test methods, including parameterized `[Theory]` cases)
 
 ## Test Helpers
 
@@ -20,7 +20,7 @@ Tests for `MounteBankAdapter.ValidateRequest` in `ValidationTest.cs`, based on [
 | ExpiryYear | Current year (or next year when current month is December) |
 | Currency | `"GBP"` |
 | Amount | `100` |
-| Cvv | `123` |
+| Cvv | `"123"` |
 
 ---
 
@@ -36,7 +36,9 @@ These tests assert `ValidateRequest` returns `true`.
 | `ValidateRequest_ReturnsTrue_WhenCardNumberHasLeadingAndTrailingWhitespace` | 1.1 | CardNumber = `"  4242424242424242  "` |
 | `ValidateRequest_ReturnsTrue_WhenCurrencyIsSupportedCaseInsensitive` | 4.2 | Currency = `GBP`, `gbp`, `CNY`, `cny`, `EUR`, `eur` |
 | `ValidateRequest_ReturnsTrue_WhenCurrencyHasLeadingAndTrailingWhitespace` | 4.1 | Currency = `"  GBP  "` |
-| `ValidateRequest_ReturnsTrue_WhenCvvHasValidLength` | 5.2 | Cvv = `123`, `1234` |
+| `ValidateRequest_ReturnsTrue_WhenCvvHasValidLength` | 5.2 | Cvv = `"123"`, `"1234"` |
+| `ValidateRequest_ReturnsTrue_WhenCvvHasLeadingAndTrailingWhitespace` | 5.1 | Cvv = `"  123  "` |
+| `ValidateRequest_ReturnsTrue_WhenCvvHasLeadingZeros` | 5.4 | Cvv = `"012"`, `"0012"` |
 
 ---
 
@@ -97,10 +99,10 @@ Supported currencies: `GBP`, `CNY`, `EUR` (case insensitive).
 
 | Test | Spec | Expected Field | Input |
 | --- | --- | --- | --- |
-| `ValidateRequest_Throws_WhenCvvIsMissing` | 5.1 | `Cvv` | `null` |
-| `ValidateRequest_Throws_WhenCvvIsTooShort` | 5.2 | `Cvv` | `12`, `1` |
-| `ValidateRequest_Throws_WhenCvvIsTooLong` | 5.2 | `Cvv` | `12345` |
-| `ValidateRequest_Throws_WhenCvvContainsNonNumericCharacters` | 5.3 | `Cvv` | `-123` |
+| `ValidateRequest_Throws_WhenCvvIsMissing` | 5.1 | `Cvv` | `null`, `""`, `"   "` |
+| `ValidateRequest_Throws_WhenCvvIsTooShort` | 5.2 | `Cvv` | `"12"`, `"1"` |
+| `ValidateRequest_Throws_WhenCvvIsTooLong` | 5.2 | `Cvv` | `"12345"` |
+| `ValidateRequest_Throws_WhenCvvContainsNonNumericCharacters` | 5.3 | `Cvv` | `"12A"`, `"abc"` |
 
 ---
 
@@ -120,9 +122,10 @@ Supported currencies: `GBP`, `CNY`, `EUR` (case insensitive).
 | 4.1 Currency exactly 3 chars | — | 2 and 4 chars |
 | 4.2 Supported currency | GBP/CNY/EUR (any case) | USD |
 | 5.1 Amount required | — | null |
-| 5.1 Cvv required | — | null |
-| 5.2 Cvv length 3–4 | 123 and 1234 | 1, 12, 12345 |
-| 5.3 Cvv numeric only | — | -123 |
+| 5.1 Cvv required | Trim whitespace | null, empty, whitespace |
+| 5.2 Cvv length 3–4 | `"123"` and `"1234"` | `"1"`, `"12"`, `"12345"` |
+| 5.3 Cvv numeric only | — | `"12A"`, `"abc"` |
+| 5.4 Cvv leading zeros allowed | `"012"`, `"0012"` | — |
 
 ## Running the Tests
 

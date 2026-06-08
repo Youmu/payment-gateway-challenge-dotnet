@@ -15,7 +15,7 @@ public class ValidationTest
         ExpiryYear = DateTime.UtcNow.Month == 12 ? DateTime.UtcNow.Year + 1 : DateTime.UtcNow.Year,
         Currency = "GBP",
         Amount = 100,
-        Cvv = 123
+        Cvv = "123"
     };
 
     private static void AssertValidationFails(string expectedField, Action validate)
@@ -84,10 +84,31 @@ public class ValidationTest
     }
 
     [Theory]
-    [InlineData(123)]
-    [InlineData(1234)]
-    public void ValidateRequest_ReturnsTrue_WhenCvvHasValidLength(int cvv)
+    [InlineData("123")]
+    [InlineData("1234")]
+    public void ValidateRequest_ReturnsTrue_WhenCvvHasValidLength(string cvv)
     {
+        var request = CreateValidRequest();
+        request.Cvv = cvv;
+
+        Assert.True(_validator.ValidateRequest(request));
+    }
+
+    [Fact]
+    public void ValidateRequest_ReturnsTrue_WhenCvvHasLeadingAndTrailingWhitespace()
+    {
+        var request = CreateValidRequest();
+        request.Cvv = "  123  ";
+
+        Assert.True(_validator.ValidateRequest(request));
+    }
+
+    [Theory]
+    [InlineData("012")]
+    [InlineData("0012")]
+    public void ValidateRequest_ReturnsTrue_WhenCvvHasLeadingZeros(string cvv)
+    {
+        // 5.4 Cvv MAY have leading zeros
         var request = CreateValidRequest();
         request.Cvv = cvv;
 
@@ -243,20 +264,23 @@ public class ValidationTest
         AssertValidationFails("Amount", () => _validator.ValidateRequest(request));
     }
 
-    [Fact]
-    public void ValidateRequest_Throws_WhenCvvIsMissing()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ValidateRequest_Throws_WhenCvvIsMissing(string? cvv)
     {
         // 5.1 Required
         var request = CreateValidRequest();
-        request.Cvv = null;
+        request.Cvv = cvv;
 
         AssertValidationFails("Cvv", () => _validator.ValidateRequest(request));
     }
 
     [Theory]
-    [InlineData(12)]
-    [InlineData(1)]
-    public void ValidateRequest_Throws_WhenCvvIsTooShort(int cvv)
+    [InlineData("12")]
+    [InlineData("1")]
+    public void ValidateRequest_Throws_WhenCvvIsTooShort(string cvv)
     {
         // 5.2 The characters count MUST >= 3 and <= 4
         var request = CreateValidRequest();
@@ -270,17 +294,19 @@ public class ValidationTest
     {
         // 5.2 The characters count MUST >= 3 and <= 4
         var request = CreateValidRequest();
-        request.Cvv = 12345;
+        request.Cvv = "12345";
 
         AssertValidationFails("Cvv", () => _validator.ValidateRequest(request));
     }
 
-    [Fact]
-    public void ValidateRequest_Throws_WhenCvvContainsNonNumericCharacters()
+    [Theory]
+    [InlineData("12A")]
+    [InlineData("abc")]
+    public void ValidateRequest_Throws_WhenCvvContainsNonNumericCharacters(string cvv)
     {
         // 5.3 MUST only contain numeric characters
         var request = CreateValidRequest();
-        request.Cvv = -123;
+        request.Cvv = cvv;
 
         AssertValidationFails("Cvv", () => _validator.ValidateRequest(request));
     }

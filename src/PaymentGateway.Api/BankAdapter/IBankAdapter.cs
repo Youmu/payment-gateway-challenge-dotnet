@@ -23,8 +23,6 @@ namespace PaymentGateway.Api.BankAdapter
     }
     public interface IBankAdapter
     {
-        Task Connect();
-
         bool ValidateRequest(PostPaymentRequest request);
 
         Task<BankResponse> Pay(string cardNumber, int expMonth, int expYear, string currency, int amount, string cvv);

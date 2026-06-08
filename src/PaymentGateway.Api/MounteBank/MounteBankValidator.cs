@@ -86,24 +86,25 @@ namespace PaymentGateway.Api.MounteBank
             }
 
             // 5.1 Required
-            if (!request.Cvv.HasValue)
+            var cvv = request.Cvv?.Trim();
+            if (string.IsNullOrWhiteSpace(cvv))
             {
                 throw new PaymentValidationException("Cvv", "Cvv is required.");
             }
 
-            var cvvText = request.Cvv.Value.ToString();
-
             // 5.2 The characters count MUST >= 3 and <= 4
-            if (cvvText.Length < 3 || cvvText.Length > 4)
+            if (cvv.Length < 3 || cvv.Length > 4)
             {
                 throw new PaymentValidationException("Cvv", "Cvv must be between 3 and 4 digits.");
             }
 
             // 5.3 MUST only contain numeric characters
-            if (!cvvText.All(char.IsDigit))
+            if (!cvv.All(char.IsDigit))
             {
                 throw new PaymentValidationException("Cvv", "Cvv must contain only numeric characters.");
             }
+
+            // 5.4 Cvv MAY have leading zeros (validated as string; not parsed to int)
 
             return true;
         }

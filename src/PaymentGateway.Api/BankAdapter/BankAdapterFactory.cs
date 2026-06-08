@@ -13,7 +13,6 @@ namespace PaymentGateway.Api.BankAdapter
                 if (Adapter == null)
                 {
                     Adapter = new MounteBankAdapter();
-                    Adapter.Connect();
                 }
                 return Adapter;
             }

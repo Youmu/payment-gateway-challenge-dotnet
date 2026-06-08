@@ -101,7 +101,7 @@ public class PaymentsControllerTests
             ExpiryYear = 2099,
             Currency = "GBP",
             Amount = 100,
-            Cvv = 123
+            Cvv = "123"
         };
         var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
         var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
@@ -151,7 +151,7 @@ public class PaymentsControllerTests
             ExpiryYear = 2099,
             Currency = "GBP",
             Amount = 100,
-            Cvv = 123
+            Cvv = "123"
         };
         var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
         var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
@@ -207,7 +207,7 @@ public class PaymentsControllerTests
             ExpiryYear = 2099,
             Currency = "GBP",
             Amount = 100,
-            Cvv = 123
+            Cvv = "123"
         };
         var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
         var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();

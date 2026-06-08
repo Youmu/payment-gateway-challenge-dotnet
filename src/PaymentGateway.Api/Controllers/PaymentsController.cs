@@ -50,7 +50,7 @@ public class PaymentsController : Controller
                 request.ExpiryYear.Value,
                 request.Currency,
                 request.Amount.Value,
-                request.Cvv.ToString()
+                request.Cvv
                 );
 #pragma warning restore CS8604, CS8629
             postPaymentResponse = new PostPaymentResponse()
@@ -70,7 +70,7 @@ public class PaymentsController : Controller
             postPaymentResponse = new PostPaymentResponse()
             {
                 Id = paymentId,
-                AuthorizationCode = "0000",
+                AuthorizationCode = Guid.Empty.ToString(),
                 Status = PaymentStatus.Rejected,
                 CardNumberLastFour = string.IsNullOrEmpty(request.CardNumber) ? "" : request.CardNumber[^4..],
                 ExpiryMonth = request.ExpiryMonth ?? 0,
@@ -84,7 +84,7 @@ public class PaymentsController : Controller
             postPaymentResponse = new PostPaymentResponse()
             {
                 Id = paymentId,
-                AuthorizationCode = "1111",
+                AuthorizationCode = Guid.Empty.ToString(),
                 Status = PaymentStatus.Rejected,
                 CardNumberLastFour = string.IsNullOrEmpty(request.CardNumber) ? "" : request.CardNumber[^4..],
                 ExpiryMonth = request.ExpiryMonth ?? 0,

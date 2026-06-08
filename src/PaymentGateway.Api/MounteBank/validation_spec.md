@@ -25,6 +25,7 @@
   * 5.1 Required
   * 5.2 The characters count MUST >= 3 and <= 4
   * 5.3 MUST only contain numeric characters
+  * 5.4 Cvv MAY have leading zeros
 
 `ValidateRequest` returns true on success, throws `PaymentValidationException` with field and message set.
 Write clear comment with requirement number for each validation.
