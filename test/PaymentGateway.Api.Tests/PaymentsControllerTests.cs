@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 using Moq;
 
 using PaymentGateway.Api.BankAdapter;
@@ -16,6 +19,7 @@ using PaymentGateway.Api.Services;
 
 namespace PaymentGateway.Api.Tests;
 
+#pragma warning disable CS8602
 public class PaymentsControllerTests
 {
     private readonly Random _random = new();
@@ -81,7 +85,7 @@ public class PaymentsControllerTests
         var mockFactory = new Mock<IBankAdapterFactory>();
         var mockBank = new Mock<IBankAdapter>();
         mockBank.Setup(b=>b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Throws(new PaymentValidationException("Mock","Expected"));
-        mockFactory.Setup(f=>f.GetAdapter(It.IsAny<string>())).Returns(mockBank.Object);
+        mockFactory.Setup(f=>f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -110,6 +114,15 @@ public class PaymentsControllerTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(paymentRep);
         Assert.Equal(PaymentStatus.Rejected, paymentRep.Status);
+
+        // Retrieve previous payment
+        var getResponse = await client.GetAsync($"/api/Payments/{paymentRep.Id}");
+        var getPayment = await getResponse.Content.ReadFromJsonAsync<PostPaymentResponse>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getPayment);
+        Assert.Equal(paymentRep.Status, getPayment.Status);
     }
 
     [Fact]
@@ -120,6 +133,7 @@ public class PaymentsControllerTests
         var mockBank = new Mock<IBankAdapter>();
         mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Returns(true);
         mockBank.Setup(b => b.Pay(
+            It.IsAny<Guid>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -131,7 +145,7 @@ public class PaymentsControllerTests
             AuthorizationCode = Guid.NewGuid().ToString(),
             Authorized = true
         });
-        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>())).Returns(mockBank.Object);
+        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -164,6 +178,15 @@ public class PaymentsControllerTests
         Assert.Equal(req.ExpiryYear, paymentRep.ExpiryYear);
         Assert.Equal(req.Currency, paymentRep.Currency);
         Assert.Equal(req.Amount, paymentRep.Amount);
+
+        // Retrieve previous payment
+        var getResponse = await client.GetAsync($"/api/Payments/{paymentRep.Id}");
+        var getPayment = await getResponse.Content.ReadFromJsonAsync<PostPaymentResponse>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getPayment);
+        Assert.Equal(paymentRep.AuthorizationCode, getPayment.AuthorizationCode);
     }
 
 
@@ -175,6 +198,7 @@ public class PaymentsControllerTests
         var mockBank = new Mock<IBankAdapter>();
         mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Returns(true);
         mockBank.Setup(b => b.Pay(
+            It.IsAny<Guid>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -187,7 +211,7 @@ public class PaymentsControllerTests
             AuthorizationCode = Guid.NewGuid().ToString(),
             Authorized = false
         });
-        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>())).Returns(mockBank.Object);
+        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -220,5 +244,14 @@ public class PaymentsControllerTests
         Assert.Equal(req.ExpiryYear, paymentRep.ExpiryYear);
         Assert.Equal(req.Currency, paymentRep.Currency);
         Assert.Equal(req.Amount, paymentRep.Amount);
+
+        // Retrieve previous payment
+        var getResponse = await client.GetAsync($"/api/Payments/{paymentRep.Id}");
+        var getPayment = await getResponse.Content.ReadFromJsonAsync<PostPaymentResponse>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getPayment);
+        Assert.Equal(paymentRep.Status, getPayment.Status);
     }
 }

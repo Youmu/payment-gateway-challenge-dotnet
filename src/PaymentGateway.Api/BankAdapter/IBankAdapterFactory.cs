@@ -2,6 +2,6 @@
 {
     public interface IBankAdapterFactory
     {
-        public IBankAdapter GetAdapter(string bankName);
+        public IBankAdapter GetAdapter(string bankName, ILogger logger);
     }
 }

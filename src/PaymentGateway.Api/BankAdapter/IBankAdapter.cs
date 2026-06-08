@@ -4,11 +4,9 @@ using PaymentGateway.Api.Models.Requests;
 
 namespace PaymentGateway.Api.BankAdapter
 {
-    public class PaymentValidationException : Exception
+    public class PaymentValidationException(string field, string message) : Exception(message)
     {
-        public PaymentValidationException(string field, string message) :
-            base(message) => Field = field;
-        public string Field { get; set; }
+        public string Field { get; set; } = field;
     }
 
     public class BankException: Exception
@@ -25,6 +23,6 @@ namespace PaymentGateway.Api.BankAdapter
     {
         bool ValidateRequest(PostPaymentRequest request);
 
-        Task<BankResponse> Pay(string cardNumber, int expMonth, int expYear, string currency, int amount, string cvv);
+        Task<BankResponse> Pay(Guid id, string cardNumber, int expMonth, int expYear, string currency, int amount, string cvv);
     }
 }

@@ -2,11 +2,13 @@ using PaymentGateway.Api.BankAdapter;
 using PaymentGateway.Api.MounteBank;
 using PaymentGateway.Api.Models.Requests;
 
+using Microsoft.Extensions.Logging.Abstractions;
+
 namespace PaymentGateway.Api.Tests;
 
 public class ValidationTest
 {
-    private readonly MounteBankAdapter _validator = new();
+    private readonly MounteBankAdapter _validator = new(NullLogger<ValidationTest>.Instance);
 
     private static PostPaymentRequest CreateValidRequest() => new()
     {

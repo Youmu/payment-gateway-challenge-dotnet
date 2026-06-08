@@ -6,14 +6,15 @@ namespace PaymentGateway.Api.BankAdapter
     {
         private MounteBankAdapter? Adapter { get; set; }
 
-        public IBankAdapter GetAdapter(string bankName)
+        public BankAdapterFactory()
+        {
+        }
+
+        public IBankAdapter GetAdapter(string bankName, ILogger logger)
         {
             if (string.Equals(bankName, "MounteBank", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (Adapter == null)
-                {
-                    Adapter = new MounteBankAdapter();
-                }
+                Adapter ??= new MounteBankAdapter(logger);
                 return Adapter;
             }
             throw new NotImplementedException();

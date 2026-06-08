@@ -17,6 +17,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PaymentsRepository>();
 builder.Services.AddSingleton<IBankAdapterFactory,BankAdapterFactory>();
 
+builder.Logging.AddConsole();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
