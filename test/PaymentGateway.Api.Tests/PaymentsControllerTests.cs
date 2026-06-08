@@ -84,8 +84,12 @@ public class PaymentsControllerTests
         // Mock
         var mockFactory = new Mock<IBankAdapterFactory>();
         var mockBank = new Mock<IBankAdapter>();
-        mockBank.Setup(b=>b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Throws(new PaymentValidationException("Mock","Expected"));
-        mockFactory.Setup(f=>f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
+        mockBank
+            .Setup(b=>b.ValidateRequest(It.IsAny<PostPaymentRequest>()))
+            .Throws(new PaymentValidationException("Mock","Expected"));
+        mockFactory
+            .Setup(f=>f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>()))
+            .Returns(mockBank.Object);
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -128,24 +132,40 @@ public class PaymentsControllerTests
     [Fact]
     public async Task Returns200WithAuthorized()
     {
+        PostPaymentRequest req = new PostPaymentRequest()
+        {
+            CardNumber = "1234567812345678",
+            ExpiryMonth = 1,
+            ExpiryYear = 2099,
+            Currency = "GBP",
+            Amount = 100,
+            Cvv = "123"
+        };
         // Mock
         var mockFactory = new Mock<IBankAdapterFactory>();
         var mockBank = new Mock<IBankAdapter>();
-        mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Returns(true);
+
+        mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>()))
+            .Returns(true);
+
         mockBank.Setup(b => b.Pay(
             It.IsAny<Guid>(),
-            It.IsAny<string>(),
-            It.IsAny<int>(),
-            It.IsAny<int>(),
-            It.IsAny<string>(),
-            It.IsAny<int>(),
-            It.IsAny<string>()
-            )
-        ).ReturnsAsync(new BankResponse() { 
-            AuthorizationCode = Guid.NewGuid().ToString(),
-            Authorized = true
-        });
-        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
+            req.CardNumber,
+            req.ExpiryMonth.Value,
+            req.ExpiryYear.Value,
+            req.Currency,
+            req.Amount.Value,
+            req.Cvv
+            ))
+            .ReturnsAsync(new BankResponse()
+            {
+                AuthorizationCode = Guid.NewGuid().ToString(),
+                Authorized = true
+            });
+
+        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>()))
+            .Returns(mockBank.Object);
+
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -158,15 +178,6 @@ public class PaymentsControllerTests
             .CreateClient();
 
         // Act
-        PostPaymentRequest req = new PostPaymentRequest()
-        {
-            CardNumber = "1234567812345678",
-            ExpiryMonth = 1,
-            ExpiryYear = 2099,
-            Currency = "GBP",
-            Amount = 100,
-            Cvv = "123"
-        };
         var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
         var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
         // Assert
@@ -193,25 +204,41 @@ public class PaymentsControllerTests
     [Fact]
     public async Task Returns200WithUnauthorized()
     {
+        PostPaymentRequest req = new PostPaymentRequest()
+        {
+            CardNumber = "1234567812345678",
+            ExpiryMonth = 1,
+            ExpiryYear = 2099,
+            Currency = "GBP",
+            Amount = 100,
+            Cvv = "123"
+        };
+
         // Mock
         var mockFactory = new Mock<IBankAdapterFactory>();
         var mockBank = new Mock<IBankAdapter>();
-        mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>())).Returns(true);
+
+        mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>()))
+            .Returns(true);
+
         mockBank.Setup(b => b.Pay(
             It.IsAny<Guid>(),
-            It.IsAny<string>(),
-            It.IsAny<int>(),
-            It.IsAny<int>(),
-            It.IsAny<string>(),
-            It.IsAny<int>(),
-            It.IsAny<string>()
-            )
-        ).ReturnsAsync(new BankResponse()
-        {
-            AuthorizationCode = Guid.NewGuid().ToString(),
-            Authorized = false
-        });
-        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>())).Returns(mockBank.Object);
+            req.CardNumber,
+            req.ExpiryMonth.Value,
+            req.ExpiryYear.Value,
+            req.Currency,
+            req.Amount.Value,
+            req.Cvv
+            ))
+            .ReturnsAsync(new BankResponse()
+            {
+                AuthorizationCode = Guid.NewGuid().ToString(),
+                Authorized = false
+            });
+
+        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>()))
+            .Returns(mockBank.Object);
+
         var paymentsRepository = new PaymentsRepository();
 
         // Arrange
@@ -224,15 +251,6 @@ public class PaymentsControllerTests
             .CreateClient();
 
         // Act
-        PostPaymentRequest req = new PostPaymentRequest()
-        {
-            CardNumber = "1234567812345678",
-            ExpiryMonth = 1,
-            ExpiryYear = 2099,
-            Currency = "GBP",
-            Amount = 100,
-            Cvv = "123"
-        };
         var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
         var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
         // Assert
