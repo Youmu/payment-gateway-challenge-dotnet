@@ -38,7 +38,7 @@ public class PaymentsController(PaymentsRepository paymentsRepository, IBankAdap
     {
         var paymentId = Guid.NewGuid();
         PostPaymentResponse postPaymentResponse;
-
+        ObjectResult objResult;
         _logger.LogInformation("Payment ID:{Id} received. {Currency}, {Amount}", paymentId, request.Currency, request.Amount);
 
         try
@@ -68,6 +68,7 @@ public class PaymentsController(PaymentsRepository paymentsRepository, IBankAdap
                 Amount = request.Amount.Value,
             };
             _logger.LogWarning("Payment ID:{Id} Status: {Status}.", paymentId, result.Authorized ? "Authorized" : "Declined");
+            objResult = new OkObjectResult(postPaymentResponse);
         }
         catch (PaymentValidationException ex)
         {
@@ -82,8 +83,8 @@ public class PaymentsController(PaymentsRepository paymentsRepository, IBankAdap
                 Currency = string.IsNullOrEmpty(request.Currency) ? "" : request.Currency[..3],
                 Amount = request.Amount ?? 0,
             };
-
             _logger.LogWarning("Payment ID:{Id} validation failed {Field}: {Message}.", paymentId, ex.Field, ex.Message);
+            objResult = new OkObjectResult(postPaymentResponse);
         }
         catch (BankException ex)
         {
@@ -99,8 +100,10 @@ public class PaymentsController(PaymentsRepository paymentsRepository, IBankAdap
                 Amount = request.Amount ?? 0,
             };
             _logger.LogWarning("Payment ID:{Id} bank error: {Message}.", paymentId, ex.Message);
+            objResult = new ObjectResult(postPaymentResponse);
+            objResult.StatusCode = 500;
         }
         _paymentsRepository.Add(postPaymentResponse);
-        return new OkObjectResult(postPaymentResponse);
+        return objResult;
     }
 }

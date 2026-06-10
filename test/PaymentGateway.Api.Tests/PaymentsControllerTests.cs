@@ -272,4 +272,72 @@ public class PaymentsControllerTests
         Assert.NotNull(getPayment);
         Assert.Equal(paymentRep.Status, getPayment.Status);
     }
+
+
+    [Fact]
+    public async Task BankServiceUnavailable()
+    {
+        PostPaymentRequest req = new PostPaymentRequest()
+        {
+            CardNumber = "1234567812345678",
+            ExpiryMonth = 1,
+            ExpiryYear = 2099,
+            Currency = "GBP",
+            Amount = 100,
+            Cvv = "123"
+        };
+
+        // Mock
+        var mockFactory = new Mock<IBankAdapterFactory>();
+        var mockBank = new Mock<IBankAdapter>();
+
+        mockBank.Setup(b => b.ValidateRequest(It.IsAny<PostPaymentRequest>()))
+            .Returns(true);
+
+        mockBank.Setup(b => b.Pay(
+            It.IsAny<Guid>(),
+            req.CardNumber,
+            req.ExpiryMonth.Value,
+            req.ExpiryYear.Value,
+            req.Currency,
+            req.Amount.Value,
+            req.Cvv
+            ))
+            .Throws(new BankException()
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+            });
+
+        mockFactory.Setup(f => f.GetAdapter(It.IsAny<string>(), It.IsAny<ILogger>()))
+            .Returns(mockBank.Object);
+
+        var paymentsRepository = new PaymentsRepository();
+
+        // Arrange
+        var webApplicationFactory = new WebApplicationFactory<PaymentsController>();
+        var client = webApplicationFactory.WithWebHostBuilder(builder =>
+            builder.ConfigureServices(services => {
+                ((ServiceCollection)services).AddSingleton(paymentsRepository);
+                ((ServiceCollection)services).AddSingleton(mockFactory.Object);
+            }))
+            .CreateClient();
+
+        // Act
+        var response = await client.PostAsJsonAsync<PostPaymentRequest>($"/api/Payments", req);
+        var paymentRep = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
+        // Assert
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.NotNull(paymentRep);
+        Assert.Equal("5678", paymentRep.CardNumberLastFour);
+        Assert.Equal(PaymentStatus.Rejected, paymentRep.Status);
+
+        // Retrieve previous payment
+        var getResponse = await client.GetAsync($"/api/Payments/{paymentRep.Id}");
+        var getPayment = await getResponse.Content.ReadFromJsonAsync<PostPaymentResponse>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getPayment);
+        Assert.Equal(paymentRep.Status, getPayment.Status);
+    }
 }

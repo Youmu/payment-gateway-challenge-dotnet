@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.6.11822.322 stable
+VisualStudioVersion = 18.6.11822.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F36BD266-CD75-4438-9BF9-CD91CDB18F2B}"
 EndProject
@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec", "spec", "{ED498A05-9
 	ProjectSection(SolutionItems) = preProject
 		design.md = design.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MounteBank.Test", "MounteBankAdapter.Test\MounteBank.Test.csproj", "{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +32,10 @@ Global
 		{3A92D8D6-0359-4752-91AE-D8A59622518A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A92D8D6-0359-4752-91AE-D8A59622518A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A92D8D6-0359-4752-91AE-D8A59622518A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -37,5 +43,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3CD9AAA2-2097-4874-9C40-FFDE26EE8E43} = {F36BD266-CD75-4438-9BF9-CD91CDB18F2B}
 		{3A92D8D6-0359-4752-91AE-D8A59622518A} = {1EF69307-274F-458E-BBE8-4D390512A8C6}
+		{6E27EA4C-01B0-4477-B2BD-EB8F8716F9D6} = {1EF69307-274F-458E-BBE8-4D390512A8C6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17BC0F60-E400-4CCD-8D41-D95BCA65A1B9}
 	EndGlobalSection
 EndGlobal

@@ -46,8 +46,20 @@ namespace PaymentGateway.Api.MounteBank
                 cvv = cvv
             };
             _logger.LogInformation("Payment ID:{Id} submitted to MounteBank bank.", id);
-            var response = await _httpClient.PostAsJsonAsync( _endpoint, paymentData);
-            if( response.IsSuccessStatusCode ) {
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsJsonAsync(_endpoint, paymentData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Payment ID:{Id} submission failed: {message}", id, ex.Message);
+                throw new BankException()
+                {
+                    StatusCode = HttpStatusCode.ServiceUnavailable
+                };
+            }
+            if ( response.IsSuccessStatusCode ) {
                 var mountBankResponse = await response.Content.ReadFromJsonAsync<MounteBankResponse>();
                 return new BankResponse()
                 {

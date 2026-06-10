@@ -1,6 +1,19 @@
 # Payment Gateway Design Spec
 This document describes the key points in the design of the payment gateway service.
 
+Message flow:
+```text
+  Merchant
+      | HTTP
+      V
+PaymentGateway
+      | Calls
+      V           +-- ValidateRequest
+ IBankAdapter --- |
+      | HTTP      +-- Pay
+      V
+ Mounted Bank
+```
 # Components
 
 ## Bank Adapter
